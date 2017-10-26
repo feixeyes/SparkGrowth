@@ -26,13 +26,30 @@ object SocketCosumeDemo {
 
     Logger.getLogger("org").setLevel(Level.ERROR)
     val sc = new SparkConf().setAppName("socketStreaming")
-    val ssc = new StreamingContext(sc, Seconds(3))
+    val ssc = new StreamingContext(sc, Seconds(5))
     ssc.checkpoint("/Users/apple/test")
     val lines = ssc.socketTextStream("localhost", 9999)
 
+
+    //    val words = ssc.sparkContext.makeRDD(List("Final","to") )
+    //      .map((_,1L))
+
+
+    //    val words2 = lines
+    //      .window(Seconds(10))
+    //      .flatMap(_.split(" "))
+    //      .map((_,1L))
+    //      .reduceByKey(_+_)
+
+
     lines.flatMap( _.split(" "))
-      .map(word => (word,1))
-      .reduceByKey(_ + _)
+      .map((_,1))
+      //      .reduceByKeyAndWindow( _+_ ,_-_ ,Seconds(30),Seconds(10))
+      //      .transform(rdd=>{
+      //        rdd.join(words)
+      //      })
+      //      .reduceByKeyAndWindow( (x:Int,y:Int)=>x+y ,(x,y)=>x-y,Seconds(30),Seconds(10))
+//      .reduceByKey(_ + _)
       .updateStateByKey(updateFunction)
       .print()
     ssc.start()
